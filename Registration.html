@@ -1,0 +1,184 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css" >
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Регистрация</title>
+</head>
+<body>
+	<form action="" method="post" autocomplete="off" onsubmit="return false;">
+	<table width="30%" border="1" align="center">
+	<h1> Форма регистрации </h1>
+<ul id="list">
+ 
+</ul>
+  	<tr>
+		<td> 
+			Фамилия: 
+		</td>
+		<td>
+            <input name="surname" type="text" placeholder="Фамилия..." pattern="^[A-Za-zА-Яа-яЁё]+$">
+            <span class="err_message">Фамилия должна содержать только буквы</span>
+		</td>
+	</tr>
+    <tr>
+		<td> 
+			Имя:
+		</td>
+		<td>
+			<input name="name" type="text" placeholder="Имя..." pattern="^[A-Za-zА-Яа-яЁё]+$">
+			<span class="err_message">Имя должно содержать только буквы</span>
+		</td>
+    </tr>
+	<tr>
+		<td>
+			Отчество:
+		</td>
+		<td>
+			<input name="patronymic" type="text" placeholder="Отчество..." pattern="^[A-Za-zА-Яа-яЁё]+$">
+			<span class="err_message">Отчество должно содержать только буквы</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Дата рождения:
+		</td>
+		<td>
+			<input type="date" id="birthday" value="option">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Паспорт:
+		</td>
+		<td>
+			Введите серию и номер паспорта без пробелов
+			<input name="passport" type="text" placeholder="NN NN NNNNNN" maxlength="12" pattern="[0-9]{2}\s[0-9]{2}\s[0-9]{6}">
+			<span class="err_message">Серия и номер паспорта должны быть вида NN NN NNNNNN</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Логин:
+		</td>
+		<td>
+			<input name="login" type="text" pattern="^[a-z]+$">
+			<span class="err_message">Логин должен содержать латинские буквы нижнего регистра</span>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			Пароль:
+		</td>
+		<td>
+			<input name="password" type="password"  minlength="10" pattern="^[\D]+$" >
+			<span class="err_message">Пароль не может содержать цифры</span>
+		</td>
+	</tr>
+	
+	<tr>
+		<td align="center">
+			<!--Сохраняет человека в хранилище и выводит на экран-->
+			<input type="submit" value="Сохранить" onclick="savePerson(this)">
+        </td>
+		<td align="center">
+			<!--Удаляет всех людей из хранилища и выводит на экран-->
+			<input type="submit" value="Очистить" onclick="clean()">
+		</td>
+	</tr>
+  
+<script>
+	var people = [];
+    function validate(item, errorMessage) {
+		item.classList.remove('error'); //убираем класс error
+        var rule = new RegExp(item.getAttribute('pattern')); // устанавливаем правило
+        if (!rule.test(item.value)) { //проверяем соответствие правилу
+            item.classList.add('error'); //ставим класс error
+            return false;
+        }
+        return true;
+    }
+
+     function savePerson() {
+        var form = document.forms[0]; //получаем форму
+		var errors = false;
+		for (var person of people) {
+			if (person.login == form.login.value.trim()) {
+				errors = true;
+				alert('Пользователь с таким логином уже существует');
+				break;
+			}
+		}
+		if (new Date() < new Date(form.birthday.value)) {
+			errors = true;
+			alert('Дата должна быть меньше текущей');
+		}
+		
+		if (9 >= form.password.value.length){
+			errors = true;
+			alert ('Минимальное количество символов в пароле - 10')
+ 		}
+		
+		if (!validate(form.surname)) {
+			errors = true;
+		}
+		if (!validate(form.patronymic)) {
+			errors = true;
+		}
+		if (!validate(form.name)) {
+			errors = true;
+		}
+		if (!validate(form.passport)) {
+			errors = true;
+		}
+		if (!validate(form.login)) {
+			errors = true;
+		}
+		if (!validate(form.password)) {
+			errors = true;
+		}
+		if (!errors) {
+			var name = form.name.value.trim(); //имя без пробелов на концах
+			var surname = form.surname.value.trim(); //фамилия без пробелов на концах
+			var patronymic = form.patronymic.value.trim(); //отчество без пробелов на концах
+			var birthday = form.birthday.value; // дата рождения	
+			var passport = form.passport.value;// данные паспорта
+			var login = form.login.value.trim();//логин без пробела на концах
+			var password = form.password.value.trim();//пароль без пробела на концах
+	
+	
+			if (name && surname && patronymic && passport && login && password && birthday) { //если все данные существуют
+				//записываем пользователя в массив
+				people.push({
+					surname: surname,
+					name: name,
+					patronymic: patronymic,
+					birthday: birthday,
+					passport: passport,
+					login: login,
+					password: password
+				});
+				//сохраняем новый массив
+				localStorage.setItem("people", JSON.stringify(people));
+	
+				//очищаем поля
+				form.surname.value = "";
+				form.name.value = "";
+				form.patronymic.value = "";
+				form.passport.value = "";
+				form.login.value = "";
+				form.password.value = "";
+			} else {
+			//если хоть одно поле пусто
+				alert("Поля не должны быть пустыми!");
+			}
+		}
+    }
+ 
+    function clean() {
+        localStorage.removeItem("people");
+    }
+ </script>
+</table>
+</form>
+</body>
+</html>
